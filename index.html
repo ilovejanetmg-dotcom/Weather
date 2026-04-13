@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Aura Weather · Салават</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --text-light: #888888;
+            --border: #e5e5e5;
+            --accent: #3a3a3a;
+            --accent-hover: #555555;
+            --divider: #f0f0f0;
+        }
+
+        body.dark {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e5e5e5;
+            --text-light: #888888;
+            --border: #2a2a2a;
+            --accent: #555555;
+            --accent-hover: #6a6a6a;
+            --divider: #2a2a2a;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: -apple-system, 'Helvetica Neue', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 24px 16px 48px;
+            min-height: 100vh;
+            transition: background 0.2s;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            color: var(--text);
+        }
+
+        .logo span {
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        body.dark .icon-btn {
+            color: var(--accent);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.94);
+            background: rgba(0,0,0,0.05);
+        }
+
+        .icon-btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .sun-icon, .moon-icon {
+            display: block;
+        }
+
+        body.dark .sun-icon {
+            display: none;
+        }
+
+        body.dark .moon-icon {
+            display: block;
+        }
+
+        .sun-icon {
+            display: block;
+        }
+
+        .moon-icon {
+            display: none;
+        }
+
+        .search-bar {
+            margin-bottom: 24px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 18px;
+            background: var(--card);
+            border: 0.5px solid var(--border);
+            border-radius: 30px;
+            font-size: 15px;
+            color: var(--text);
+            outline: none;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-btn {
+            background: var(--accent);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .search-btn:active {
+            transform: scale(0.96);
+            opacity: 0.85;
+        }
+
+        .search-btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .current-weather {
+            text-align: center;
+            margin-bottom: 48px;
+            padding: 24px 0;
+        }
+
+        .current-temp {
+            font-size: 72px;
+            font-weight: 600;
+            letter-spacing: -2px;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .current-temp span {
+            font-size: 28px;
+            font-weight: 400;
+        }
+
+        .current-desc {
+            font-size: 18px;
+            color: var(--text-light);
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .current-icon {
+            font-size: 32px;
+        }
+
+        .current-details {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .current-details span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .days-section {
+            margin-top: 8px;
+        }
+
+        .day-card {
+            margin-bottom: 32px;
+            border-top: 0.5px solid var(--divider);
+            padding-top: 24px;
+        }
+
+        .day-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .periods-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .period-item {
+            text-align: center;
+        }
+
+        .period-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            text-transform: lowercase;
+        }
+
+        .period-temp {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .period-wind {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .period-wind::before {
+            content: "💨 ";
+            font-size: 10px;
+        }
+
+        .period-pressure {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        .period-pressure::before {
+            content: "📊 ";
+            font-size: 10px;
+        }
+
+        .period-humidity {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .period-humidity::before {
+            content: "💧 ";
+            font-size: 10px;
+        }
+
+        .update-time {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 0.5px solid var(--divider);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading::after {
+            content: '...';
+            animation: pulse 1.5s infinite;
+        }
+
+        @media (max-width: 480px) {
+            .periods-grid {
+                gap: 8px;
+            }
+            .period-temp {
+                font-size: 18px;
+            }
+            .period-label {
+                font-size: 11px;
+            }
+            .current-temp {
+                font-size: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">aura <span>· погода</span></div>
+        <div class="header-actions">
+            <button class="icon-btn" id="themeBtn">
+                <svg class="sun-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                </svg>
+                <svg class="moon-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" class="search-input" id="cityInput" placeholder="поиск города..." value="Салават">
+        <button class="search-btn" id="searchBtn">найти</button>
+    </div>
+
+    <div id="weatherContent">
+        <div class="loading">загружаем погоду</div>
+    </div>
+
+    <div class="update-time" id="updateTime"></div>
+</div>
+
+<script>
+    let currentLat = 53.375;
+    let currentLon = 55.9375;
+    let currentCity = "Салават";
+
+    const weatherIcons = {
+        0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
+        45: "🌫️", 48: "🌫️",
+        51: "🌧️", 53: "🌧️", 55: "🌧️",
+        61: "🌦️", 63: "🌧️", 65: "🌧️",
+        71: "🌨️", 73: "🌨️", 75: "❄️",
+        80: "🌦️", 81: "🌧️", 82: "🌧️",
+        95: "⛈️", 96: "⛈️", 99: "⛈️"
+    };
+
+    function getWeatherIcon(code) {
+        return weatherIcons[code] || "🌡️";
+    }
+
+    async function getCoordinates(cityName) {
+        try {
+            const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=ru&format=json`);
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+                return {
+                    lat: data.results[0].latitude,
+                    lon: data.results[0].longitude,
+                    name: data.results[0].name
+                };
+            }
+            return null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function loadWeather(lat, lon) {
+        try {
+            const currentRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`);
+            const currentData = await currentRes.json();
+
+            const dailyRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&hourly=temperature_2m,windspeed_10m,pressure_msl,relativehumidity_2m,weathercode&timezone=auto&forecast_days=7`);
+            const dailyData = await dailyRes.json();
+
+            return { current: currentData, daily: dailyData };
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+    }
+
+    function getPeriodsFromHourly(hourly, dayIndex) {
+        const times = hourly.time;
+        const temps = hourly.temperature_2m;
+        const winds = hourly.windspeed_10m;
+        const pressures = hourly.pressure_msl;
+        const humidities = hourly.relativehumidity_2m;
+        const codes = hourly.weathercode;
+
+        let dayStartIdx = -1;
+        for (let i = 0; i < times.length; i++) {
+            const date = new Date(times[i]);
+            const currentDay = new Date();
+            currentDay.setDate(currentDay.getDate() + dayIndex);
+            if (date.toDateString() === currentDay.toDateString()) {
+                dayStartIdx = i;
+                break;
+            }
+        }
+
+        if (dayStartIdx === -1) return null;
+
+        const periods = {
+            morning: { hour: 10, label: "утро" },
+            day: { hour: 14, label: "день" },
+            evening: { hour: 19, label: "вечер" },
+            night: { hour: 1, label: "ночь" }
+        };
+
+        const result = {};
+
+        for (const [key, period] of Object.entries(periods)) {
+            let targetHour = period.hour;
+            let idx = dayStartIdx;
+            let found = false;
+
+            for (let i = 0; i < times.length && !found; i++) {
+                const date = new Date(times[i]);
+                const hour = date.getHours();
+                if (date.toDateString() === new Date(times[dayStartIdx]).toDateString() && hour === targetHour) {
+                    idx = i;
+                    found = true;
+                }
+            }
+
+            if (key === 'night') {
+                for (let i = 0; i < times.length; i++) {
+                    const date = new Date(times[i]);
+                    const nextDay = new Date(times[dayStartIdx]);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    if (date.toDateString() === nextDay.toDateString() && date.getHours() === 2) {
+                        idx = i;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (found && temps[idx] !== undefined) {
+                result[key] = {
+                    temp: Math.round(temps[idx]),
+                    wind: Math.round(winds[idx]),
+                    pressure: Math.round(pressures[idx]),
+                    humidity: Math.round(humidities[idx]),
+                    icon: getWeatherIcon(codes[idx])
+                };
+            } else {
+                result[key] = {
+                    temp: Math.round(temps[dayStartIdx + 6] || 0),
+                    wind: Math.round(winds[dayStartIdx + 6] || 0),
+                    pressure: Math.round(pressures[dayStartIdx + 6] || 750),
+                    humidity: Math.round(humidities[dayStartIdx + 6] || 60),
+                    icon: "🌡️"
+                };
+            }
+        }
+
+        return result;
+    }
+
+    async function updateWeather() {
+        const contentDiv = document.getElementById('weatherContent');
+        contentDiv.innerHTML = '<div class="loading">загружаем погоду</div>';
+
+        try {
+            const data = await loadWeather(currentLat, currentLon);
+            const current = data.current.current_weather;
+            const temp = Math.round(current.temperature);
+            const wind = current.windspeed;
+            const icon = getWeatherIcon(current.weathercode);
+
+            let desc = "";
+            if (current.weathercode === 0) desc = "ясно";
+            else if (current.weathercode <= 3) desc = "облачно";
+            else if (current.weathercode >= 61 && current.weathercode <= 65) desc = "дождь";
+            else if (current.weathercode >= 71 && current.weathercode <= 75) desc = "снег";
+            else desc = "переменная облачность";
+
+            let daysHtml = '';
+            const today = new Date();
+            const hourly = data.daily.hourly;
+
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date();
+                dayDate.setDate(today.getDate() + i);
+                const dayName = dayDate.toLocaleDateString('ru-RU', { weekday: 'long' });
+                const dayNameCapitalized = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+                const monthName = dayDate.toLocaleDateString('ru-RU', { month: 'long' });
+
+                const periods = getPeriodsFromHourly(hourly, i);
+                if (!periods) continue;
+
+                daysHtml += `
+                    <div class="day-card">
+                        <div class="day-name">${dayNameCapitalized}, ${dayDate.getDate()} ${monthName}</div>
+                        <div class="periods-grid">
+                            <div class="period-item">
+                                <div class="period-label">утро</div>
+                                <div class="period-temp">+${periods.morning.temp}°</div>
+                                <div class="period-wind">${periods.morning.wind}</div>
+                                <div class="period-pressure">${periods.morning.pressure}</div>
+                                <div class="period-humidity">${periods.morning.humidity}%</div>
+                            </div>
+                            <div class="period-item">
+                                <div class="period-label">день</div>
+                                <div class="period-temp">+${periods.day.temp}°</div>
+                                <div class="period-wind">${periods.day.wind}</div>
+                                <div class="period-pressure">${periods.day.pressure}</div>
+                                <div class="period-humidity">${periods.day.humidity}%</div>
+                            </div>
+                            <div class="period-item">
+                                <div class="period-label">вечер</div>
+                                <div class="period-temp">+${periods.evening.temp}°</div>
+                                <div class="period-wind">${periods.evening.wind}</div>
+                                <div class="period-pressure">${periods.evening.pressure}</div>
+                                <div class="period-humidity">${periods.evening.humidity}%</div>
+                            </div>
+                            <div class="period-item">
+                                <div class="period-label">ночь</div>
+                                <div class="period-temp">+${periods.night.temp}°</div>
+                                <div class="period-wind">${periods.night.wind}</div>
+                                <div class="period-pressure">${periods.night.pressure}</div>
+                                <div class="period-humidity">${periods.night.humidity}%</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = `
+                <div class="current-weather">
+                    <div class="current-temp">${temp}<span>°C</span></div>
+                    <div class="current-desc">
+                        <span class="current-icon">${icon}</span>
+                        <span>${desc}</span>
+                    </div>
+                    <div class="current-details">
+                        <span>💨 ${wind} м/с</span>
+                        <span>💧 влажность —</span>
+                        <span>📊 давление —</span>
+                    </div>
+                </div>
+
+                <div class="days-section">
+                    ${daysHtml}
+                </div>
+            `;
+
+            document.getElementById('updateTime').innerHTML = `обновлено: ${new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} · данные: Open-Meteo`;
+
+        } catch (error) {
+            contentDiv.innerHTML = '<div class="loading">❌ ошибка загрузки. попробуйте позже</div>';
+        }
+    }
+
+    async function searchCity() {
+        const city = document.getElementById('cityInput').value.trim();
+        if (!city) return;
+        const coords = await getCoordinates(city);
+        if (coords) {
+            currentLat = coords.lat;
+            currentLon = coords.lon;
+            currentCity = coords.name;
+            await updateWeather();
+        } else {
+            document.getElementById('weatherContent').innerHTML = '<div class="loading">❌ город не найден</div>';
+        }
+    }
+
+    function initTheme() {
+        const saved = localStorage.getItem('aura_theme');
+        if (saved === 'dark') {
+            document.body.classList.add('dark');
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        localStorage.setItem('aura_theme', isDark ? 'dark' : 'light');
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', searchCity);
+    document.getElementById('cityInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchCity();
+    });
+    document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+
+    initTheme();
+    updateWeather();
+</script>
+</body>
+</html>
