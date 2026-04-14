@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Aura Weather · Санкт-Петербург</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --text-light: #888888;
+            --border: #e5e5e5;
+            --accent: #3a3a3a;
+            --accent-hover: #555555;
+            --divider: #f0f0f0;
+        }
+
+        body.dark {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e5e5e5;
+            --text-light: #888888;
+            --border: #2a2a2a;
+            --accent: #555555;
+            --accent-hover: #6a6a6a;
+            --divider: #2a2a2a;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: -apple-system, 'Helvetica Neue', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 24px 16px 48px;
+            min-height: 100vh;
+            transition: background 0.2s;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            color: var(--text);
+        }
+
+        .logo span {
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        button {
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        body.dark .icon-btn {
+            color: var(--accent);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.94);
+            background: rgba(0,0,0,0.05);
+        }
+
+        .icon-btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .sun-icon, .moon-icon {
+            display: block;
+        }
+
+        body.dark .sun-icon {
+            display: none;
+        }
+
+        body.dark .moon-icon {
+            display: block;
+        }
+
+        .sun-icon {
+            display: block;
+        }
+
+        .moon-icon {
+            display: none;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            font-size: 15px;
+            color: var(--text);
+            outline: none;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-btn {
+            background: var(--accent);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 32px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .search-btn:active {
+            transform: scale(0.96);
+            opacity: 0.85;
+        }
+
+        .search-btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .current-weather {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .current-temp {
+            font-size: 72px;
+            font-weight: 600;
+            letter-spacing: -2px;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .current-temp span {
+            font-size: 28px;
+            font-weight: 400;
+        }
+
+        .current-desc {
+            font-size: 18px;
+            color: var(--text-light);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .current-icon-emoji {
+            font-size: 56px;
+            line-height: 1;
+            display: inline-block;
+            width: 64px;
+            text-align: center;
+        }
+
+        .current-details {
+            display: flex;
+            justify-content: center;
+            gap: 28px;
+            margin-top: 14px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .current-details span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .detail-icon {
+            width: 15px;
+            height: 15px;
+            stroke: var(--text-light);
+            stroke-width: 1.2;
+            fill: none;
+        }
+
+        .days-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .day-card {
+            border-top: 0.5px solid var(--divider);
+            padding-top: 18px;
+            margin-top: 0;
+        }
+
+        .day-header {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .periods-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .period-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .period-label {
+            width: 55px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            text-transform: lowercase;
+        }
+
+        .period-icon {
+            width: 44px;
+            font-size: 32px;
+            text-align: center;
+        }
+
+        .period-temp {
+            width: 56px;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .period-wind {
+            width: 70px;
+            font-size: 12px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .period-pressure {
+            width: 58px;
+            font-size: 12px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .period-humidity {
+            width: 58px;
+            font-size: 12px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .small-icon {
+            width: 11px;
+            height: 11px;
+            stroke: var(--text-light);
+            stroke-width: 1.2;
+        }
+
+        .update-time {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 0.5px solid var(--divider);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading::after {
+            content: '...';
+            animation: pulse 1.5s infinite;
+        }
+
+        @media (max-width: 550px) {
+            .period-row {
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 8px 0;
+            }
+            .period-label {
+                width: 50px;
+            }
+            .period-icon {
+                width: 40px;
+                font-size: 28px;
+            }
+            .period-temp {
+                width: 50px;
+                font-size: 16px;
+            }
+            .period-wind, .period-pressure, .period-humidity {
+                width: auto;
+                flex: 1;
+            }
+            .current-icon-emoji {
+                font-size: 48px;
+                width: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">aura <span>· погода</span></div>
+        <div class="header-actions">
+            <button class="icon-btn" id="themeBtn">
+                <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                </svg>
+                <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" class="search-input" id="cityInput" placeholder="поиск города..." value="Санкт-Петербург">
+        <button class="search-btn" id="searchBtn">найти</button>
+    </div>
+
+    <div id="weatherContent">
+        <div class="loading">загружаем погоду</div>
+    </div>
+
+    <div class="update-time" id="updateTime"></div>
+</div>
+
+<script>
+    // Город по умолчанию — Санкт-Петербург
+    let currentLat = 59.9343;
+    let currentLon = 30.3351;
+    let currentCity = "Санкт-Петербург";
+
+    // Загружаем сохранённый город из localStorage
+    function loadSavedCity() {
+        const saved = localStorage.getItem('aura_last_city');
+        if (saved) {
+            try {
+                const cityData = JSON.parse(saved);
+                currentLat = cityData.lat;
+                currentLon = cityData.lon;
+                currentCity = cityData.name;
+                document.getElementById('cityInput').value = currentCity;
+                return true;
+            } catch(e) {}
+        }
+        return false;
+    }
+
+    // Сохраняем город в localStorage
+    function saveCity(lat, lon, name) {
+        localStorage.setItem('aura_last_city', JSON.stringify({
+            lat: lat,
+            lon: lon,
+            name: name
+        }));
+    }
+
+    function getWindDirection(degrees) {
+        if (degrees === undefined || degrees === null) return "—";
+        const directions = [
+            { name: "С", min: 0, max: 22.5 },
+            { name: "СВ", min: 22.5, max: 67.5 },
+            { name: "В", min: 67.5, max: 112.5 },
+            { name: "ЮВ", min: 112.5, max: 157.5 },
+            { name: "Ю", min: 157.5, max: 202.5 },
+            { name: "ЮЗ", min: 202.5, max: 247.5 },
+            { name: "З", min: 247.5, max: 292.5 },
+            { name: "СЗ", min: 292.5, max: 337.5 },
+            { name: "С", min: 337.5, max: 360 }
+        ];
+        for (const dir of directions) {
+            if (degrees >= dir.min && degrees < dir.max) return dir.name;
+        }
+        return "С";
+    }
+
+    function convertWindSpeed(kmh) {
+        if (kmh === undefined || kmh === null) return "—";
+        return Math.round(kmh / 3.6);
+    }
+
+    const weatherEmojis = {
+        clear: "☀️",
+        partlyCloudy: "⛅",
+        cloudy: "☁️",
+        rain: "🌧️",
+        heavyRain: "🌧️",
+        snow: "❄️",
+        thunderstorm: "⛈️",
+        fog: "🌫️"
+    };
+
+    function getWeatherType(code) {
+        if (code === 0) return "clear";
+        if (code === 1 || code === 2) return "partlyCloudy";
+        if (code === 3) return "cloudy";
+        if (code === 45 || code === 48) return "fog";
+        if (code >= 51 && code <= 55) return "rain";
+        if ((code >= 61 && code <= 65) || (code >= 80 && code <= 82)) return code >= 65 ? "heavyRain" : "rain";
+        if (code >= 71 && code <= 77) return "snow";
+        if (code >= 95 && code <= 99) return "thunderstorm";
+        return "cloudy";
+    }
+
+    function getWeatherEmoji(code) {
+        const type = getWeatherType(code);
+        return weatherEmojis[type] || "☁️";
+    }
+
+    async function getCoordinates(cityName) {
+        try {
+            const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=ru&format=json`);
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+                return {
+                    lat: data.results[0].latitude,
+                    lon: data.results[0].longitude,
+                    name: data.results[0].name
+                };
+            }
+            return null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function loadWeather(lat, lon) {
+        try {
+            const currentRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`);
+            const currentData = await currentRes.json();
+
+            const dailyRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&hourly=temperature_2m,windspeed_10m,winddirection_10m,pressure_msl,relativehumidity_2m,weathercode&timezone=auto&forecast_days=7`);
+            const dailyData = await dailyRes.json();
+
+            return { current: currentData, daily: dailyData };
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+    }
+
+    function getPeriodsFromHourly(hourly, dayIndex) {
+        const times = hourly.time;
+        const temps = hourly.temperature_2m;
+        const winds = hourly.windspeed_10m;
+        const windDirs = hourly.winddirection_10m;
+        const pressures = hourly.pressure_msl;
+        const humidities = hourly.relativehumidity_2m;
+        const codes = hourly.weathercode;
+
+        let dayStartIdx = -1;
+        for (let i = 0; i < times.length; i++) {
+            const date = new Date(times[i]);
+            const currentDay = new Date();
+            currentDay.setDate(currentDay.getDate() + dayIndex);
+            if (date.toDateString() === currentDay.toDateString()) {
+                dayStartIdx = i;
+                break;
+            }
+        }
+
+        if (dayStartIdx === -1) return null;
+
+        const periods = {
+            night: { hour: 2, label: "ночь" },
+            morning: { hour: 10, label: "утро" },
+            day: { hour: 14, label: "день" },
+            evening: { hour: 19, label: "вечер" }
+        };
+
+        const result = {};
+
+        for (const [key, period] of Object.entries(periods)) {
+            let targetHour = period.hour;
+            let idx = dayStartIdx;
+            let found = false;
+
+            for (let i = 0; i < times.length && !found; i++) {
+                const date = new Date(times[i]);
+                const hour = date.getHours();
+                if (date.toDateString() === new Date(times[dayStartIdx]).toDateString() && hour === targetHour) {
+                    idx = i;
+                    found = true;
+                }
+            }
+
+            if (key === 'night') {
+                for (let i = 0; i < times.length; i++) {
+                    const date = new Date(times[i]);
+                    const nextDay = new Date(times[dayStartIdx]);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    if (date.toDateString() === nextDay.toDateString() && date.getHours() === 2) {
+                        idx = i;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (found && temps[idx] !== undefined) {
+                result[key] = {
+                    temp: Math.round(temps[idx]),
+                    wind: convertWindSpeed(winds[idx]),
+                    windDir: windDirs ? Math.round(windDirs[idx]) : null,
+                    pressure: Math.round(pressures[idx]),
+                    humidity: Math.round(humidities[idx]),
+                    weatherCode: codes[idx]
+                };
+            } else {
+                result[key] = {
+                    temp: Math.round(temps[dayStartIdx + 6] || 0),
+                    wind: convertWindSpeed(winds[dayStartIdx + 6] || 0),
+                    windDir: null,
+                    pressure: Math.round(pressures[dayStartIdx + 6] || 750),
+                    humidity: Math.round(humidities[dayStartIdx + 6] || 60),
+                    weatherCode: 3
+                };
+            }
+        }
+
+        return result;
+    }
+
+    async function updateWeather() {
+        const contentDiv = document.getElementById('weatherContent');
+        contentDiv.innerHTML = '<div class="loading">загружаем погоду</div>';
+
+        try {
+            const data = await loadWeather(currentLat, currentLon);
+            const current = data.current.current_weather;
+            const temp = Math.round(current.temperature);
+            const windKmh = current.windspeed;
+            const windMs = convertWindSpeed(windKmh);
+            const windDir = current.winddirection;
+            const weatherCode = current.weathercode;
+            const windDirectionText = getWindDirection(windDir);
+
+            let desc = "";
+            const type = getWeatherType(weatherCode);
+            const descMap = {
+                clear: "ясно",
+                partlyCloudy: "переменная облачность",
+                cloudy: "пасмурно",
+                rain: "дождь",
+                heavyRain: "сильный дождь",
+                snow: "снег",
+                thunderstorm: "гроза",
+                fog: "туман"
+            };
+            desc = descMap[type] || "облачно";
+
+            let daysHtml = '';
+            const today = new Date();
+            const hourly = data.daily.hourly;
+
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date();
+                dayDate.setDate(today.getDate() + i);
+                const dayName = dayDate.toLocaleDateString('ru-RU', { weekday: 'long' });
+                const dayNameCapitalized = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+                const monthName = dayDate.toLocaleDateString('ru-RU', { month: 'long' });
+
+                const periods = getPeriodsFromHourly(hourly, i);
+                if (!periods) continue;
+
+                daysHtml += `
+                    <div class="day-card">
+                        <div class="day-header">${dayNameCapitalized}, ${dayDate.getDate()} ${monthName}</div>
+                        <div class="periods-vertical">
+                            <div class="period-row">
+                                <span class="period-label">ночь</span>
+                                <span class="period-icon">${getWeatherEmoji(periods.night.weatherCode)}</span>
+                                <span class="period-temp">${periods.night.temp > 0 ? '+' : ''}${periods.night.temp}°</span>
+                                <span class="period-wind"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>${periods.night.wind}<span>${getWindDirection(periods.night.windDir)}</span></span>
+                                <span class="period-pressure"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>${periods.night.pressure}</span>
+                                <span class="period-humidity"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2.5s-5 7-5 10.5a5 5 0 0 0 10 0c0-3.5-5-10.5-5-10.5z"/></svg>${periods.night.humidity}%</span>
+                            </div>
+                            <div class="period-row">
+                                <span class="period-label">утро</span>
+                                <span class="period-icon">${getWeatherEmoji(periods.morning.weatherCode)}</span>
+                                <span class="period-temp">${periods.morning.temp > 0 ? '+' : ''}${periods.morning.temp}°</span>
+                                <span class="period-wind"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>${periods.morning.wind}<span>${getWindDirection(periods.morning.windDir)}</span></span>
+                                <span class="period-pressure"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>${periods.morning.pressure}</span>
+                                <span class="period-humidity"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2.5s-5 7-5 10.5a5 5 0 0 0 10 0c0-3.5-5-10.5-5-10.5z"/></svg>${periods.morning.humidity}%</span>
+                            </div>
+                            <div class="period-row">
+                                <span class="period-label">день</span>
+                                <span class="period-icon">${getWeatherEmoji(periods.day.weatherCode)}</span>
+                                <span class="period-temp">${periods.day.temp > 0 ? '+' : ''}${periods.day.temp}°</span>
+                                <span class="period-wind"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>${periods.day.wind}<span>${getWindDirection(periods.day.windDir)}</span></span>
+                                <span class="period-pressure"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>${periods.day.pressure}</span>
+                                <span class="period-humidity"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2.5s-5 7-5 10.5a5 5 0 0 0 10 0c0-3.5-5-10.5-5-10.5z"/></svg>${periods.day.humidity}%</span>
+                            </div>
+                            <div class="period-row">
+                                <span class="period-label">вечер</span>
+                                <span class="period-icon">${getWeatherEmoji(periods.evening.weatherCode)}</span>
+                                <span class="period-temp">${periods.evening.temp > 0 ? '+' : ''}${periods.evening.temp}°</span>
+                                <span class="period-wind"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>${periods.evening.wind}<span>${getWindDirection(periods.evening.windDir)}</span></span>
+                                <span class="period-pressure"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>${periods.evening.pressure}</span>
+                                <span class="period-humidity"><svg class="small-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2.5s-5 7-5 10.5a5 5 0 0 0 10 0c0-3.5-5-10.5-5-10.5z"/></svg>${periods.evening.humidity}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = `
+                <div class="current-weather">
+                    <div class="current-temp">${temp}<span>°C</span></div>
+                    <div class="current-desc">
+                        <span class="current-icon-emoji">${getWeatherEmoji(weatherCode)}</span>
+                        <span>${desc}</span>
+                    </div>
+                    <div class="current-details">
+                        <span><svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg> ${windMs} м/с <span>${windDirectionText}</span></span>
+                        <span><svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2.5s-5 7-5 10.5a5 5 0 0 0 10 0c0-3.5-5-10.5-5-10.5z"/></svg> влажность —</span>
+                        <span><svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> давление —</span>
+                    </div>
+                </div>
+
+                <div class="days-list">
+                    ${daysHtml}
+                </div>
+            `;
+
+            document.getElementById('updateTime').innerHTML = `обновлено: ${new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} · данные: Open-Meteo`;
+
+        } catch (error) {
+            console.error(error);
+            contentDiv.innerHTML = '<div class="loading">❌ ошибка загрузки. попробуйте позже</div>';
+        }
+    }
+
+    async function searchCity() {
+        const city = document.getElementById('cityInput').value.trim();
+        if (!city) return;
+        const coords = await getCoordinates(city);
+        if (coords) {
+            currentLat = coords.lat;
+            currentLon = coords.lon;
+            currentCity = coords.name;
+            saveCity(currentLat, currentLon, currentCity);
+            document.getElementById('cityInput').value = currentCity;
+            await updateWeather();
+        } else {
+            document.getElementById('weatherContent').innerHTML = '<div class="loading">❌ город не найден</div>';
+        }
+    }
+
+    function initTheme() {
+        const saved = localStorage.getItem('aura_theme');
+        if (saved === 'dark') {
+            document.body.classList.add('dark');
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        localStorage.setItem('aura_theme', isDark ? 'dark' : 'light');
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', searchCity);
+    document.getElementById('cityInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchCity();
+    });
+    document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+
+    // Загружаем сохранённый город или используем Санкт-Петербург по умолчанию
+    if (!loadSavedCity()) {
+        saveCity(currentLat, currentLon, currentCity);
+    }
+    
+    initTheme();
+    updateWeather();
+</script>
+</body>
+</html>
